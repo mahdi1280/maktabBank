@@ -73,7 +73,7 @@ public class TransactionRepository {
     public List<Transaction> findBuUserId(Connection connection,long userId,long walletId) throws SQLException {
         String sql="select *\n" +
                 "from bank.transaction\n" +
-                "where bank.transaction.customer_id =? and wallet_id =?";
+                "where bank.transaction.customer_id =? and wallet_id =? order by date";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setLong(1,userId);
         preparedStatement.setLong(2,walletId);
