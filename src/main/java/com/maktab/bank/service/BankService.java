@@ -1,6 +1,6 @@
 package com.maktab.bank.service;
 
-import com.maktab.bank.customexception.ManyException;
+import com.maktab.bank.customexception.*;
 import com.maktab.bank.model.*;
 import com.maktab.bank.model.enumType.TransactionType;
 import com.maktab.bank.repository.BankRepository;
@@ -32,20 +32,14 @@ public class BankService implements BankServiceImpl {
     private final WalletRepository walletRepository = new WalletRepository();
     private final TransactionRepository transactionRepository = new TransactionRepository();
     private final CustomerRepository customerRepository = new CustomerRepository();
-    private Bank bank;
-    private Boss boss;
-    private Customer customer;
-    private Employee employee;
-    private Transaction transaction;
-    private Wallet wallet;
 
     public BankService() throws SQLException {
-        customer = new Customer(connection);
-        bank = new Bank(connection);
-        wallet = new Wallet(connection);
-        transaction = new Transaction(connection);
-        employee = new Employee(connection);
-        boss=new Boss(connection);
+        Customer customer = new Customer(connection);
+       Bank bank = new Bank(connection);
+       Wallet wallet = new Wallet(connection);
+        Transaction transaction = new Transaction(connection);
+        Employee employee = new Employee(connection);
+       Boss boss=new Boss(connection);
     }
 
     @Override
@@ -61,8 +55,21 @@ public class BankService implements BankServiceImpl {
 
     @Override
     public void deposit(long walletId, long customerId, String password, int amount) throws SQLException {
-        Wallet wallet = walletRepository.find(connection, walletId, password);
-        Customer customer=customerRepository.find(connection,customerId);
+       Customer customer;
+       Wallet wallet;
+        try {
+            wallet=walletRepository.find(connection, walletId, password);
+            customer=customerRepository.find(connection, customerId);
+        } catch (NotFoundWalletException notFoundWalletException) {
+            System.out.println(notFoundWalletException.getMessage());
+            return;
+        }catch (CustomerNotFoundException customerNotFoundException){
+            System.out.println(customerNotFoundException.getMessage());
+            return;
+        }catch (PasswordException passwordException){
+            System.out.println(passwordException.getMessage());
+            return;
+        }
         Transaction transaction = Transaction.builder()
                 .setDate(Date.valueOf(LocalDate.now()))
                 .setPrice(amount)
@@ -75,8 +82,18 @@ public class BankService implements BankServiceImpl {
 
     @Override
     public void withdraw(long walletId,long customerId, String password, int amount) throws SQLException {
-        Wallet wallet = walletRepository.find(connection, walletId, password);
-        Customer customer=customerRepository.find(connection,customerId);
+        Wallet wallet;
+        Customer customer;
+        try {
+           wallet= walletRepository.find(connection, walletId, password);
+           customer= customerRepository.find(connection, customerId);
+        } catch (NotFoundWalletException notFoundWalletException) {
+            System.out.println(notFoundWalletException.getMessage());
+            return;
+        }catch (CustomerNotFoundException customerNotFoundException){
+            System.out.println(customerNotFoundException.getMessage());
+            return;
+        }
         int deposit=transactionRepository.getDeposit(connection,wallet.getId());
         int withdraw=transactionRepository.getWithdraw(connection,wallet.getId());
         if(deposit-withdraw-amount<0)
@@ -93,20 +110,48 @@ public class BankService implements BankServiceImpl {
 
     @Override
     public void cardToCard(long myWalletId, long otherWalletId, int amount, String password) throws SQLException {
-        transactionRepository.cardToCard(connection,myWalletId,password,otherWalletId,amount);
+       try {
+           transactionRepository.cardToCard(connection, myWalletId, password, otherWalletId, amount);
+       }catch (TryPasswordException tryPasswordException){
+           System.out.println(tryPasswordException.getMessage());
+       }catch (PasswordException passwordException){
+           System.out.println(passwordException.getMessage());
+       }catch (ManyException manyException){
+           System.out.println(manyException.getMessage());
+       }catch (NotFoundWalletException notFoundWalletException){
+           System.out.println(notFoundWalletException.getMessage());
+       }
     }
 
     @Override
     public long getAmount(long myWallet, String password) throws SQLException {
-        Wallet wallet=walletRepository.find(connection,myWallet,password);
-        int deposit=transactionRepository.getDeposit(connection,wallet.getId());
+        Wallet wallet;
+        try {
+            wallet= walletRepository.find(connection, myWallet, password);
+        }catch (PasswordException passwordException) {
+            System.out.println(passwordException.getMessage());
+            return 0;
+        }catch (NotFoundWalletException notFoundWalletException){
+            System.out.println(notFoundWalletException.getMessage());
+            return 0;
+        }
+        int deposit = transactionRepository.getDeposit(connection, wallet.getId());
         int withdraw=transactionRepository.getWithdraw(connection,wallet.getId());
         return deposit-withdraw;
     }
 
     @Override
     public void showListTransaction(long myWallet,long userId, String password) throws SQLException {
+        try {
         walletRepository.find(connection,myWallet,password);
+
+        }catch (PasswordException passwordException){
+            System.out.println(passwordException.getMessage());
+            return;
+        }catch (NotFoundWalletException notFoundWalletException){
+            System.out.println(notFoundWalletException.getMessage());
+            return;
+        }
         List<Transaction> buUserId = transactionRepository.findBuUserId(connection, userId, myWallet);
         for (Transaction transaction : buUserId) {
             System.out.println(transaction.toString());
@@ -123,11 +168,24 @@ public class BankService implements BankServiceImpl {
 
     @Override
     public Customer login(Customer customer) throws SQLException {
+        try {
         return customerRepository.login(connection,customer);
+
+        }catch (CustomerNotFoundException customerNotFoundException){
+            System.out.println(customerNotFoundException.getMessage());
+            return null;
+        }
     }
 
     @Override
     public void changePassword(long walletId, String password,String newPassword) throws SQLException {
+        try{
         walletRepository.changePassword(connection,walletId,password,newPassword);
+        }catch (PasswordException passwordException){
+            System.out.println(passwordException.getMessage());
+        }catch (NotFoundWalletException notFoundWalletException){
+            System.out.println(notFoundWalletException.getMessage());
+        }
+
     }
 }

@@ -73,6 +73,10 @@ public class WalletRepository {
                 updateTryPassword(connection,build);
                 throw new PasswordException("password not valid");
             }
+            if(resultSet.getInt("try_password")>3){
+                System.out.println("shoma bish az andaze password eshtebah vared karde id.");
+                throw new PasswordException("password not valid");
+            }
             return build;
         }
         throw new NotFoundWalletException("wallet not found");
@@ -112,7 +116,7 @@ public class WalletRepository {
                 "     try_password=? " +
                 "where id=?;";
         PreparedStatement preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setInt(1,myWallet.getTryPassword());
+        preparedStatement.setInt(1,myWallet.getTryPassword()+1);
         preparedStatement.setLong(2,myWallet.getId());
         preparedStatement.execute();
         preparedStatement.close();

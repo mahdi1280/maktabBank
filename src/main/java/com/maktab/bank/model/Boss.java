@@ -11,7 +11,7 @@ public class Boss {
     private String firstName;
 
     public Boss(Connection connection) throws SQLException {
-        String sql="create table if not exists bank.boss(\n" +
+        String sql = "create table if not exists bank.boss(\n" +
                 "    id serial primary key ,\n" +
                 "    lsat_name varchar(200),\n" +
                 "    first_name varchar(200),\n" +

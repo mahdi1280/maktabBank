@@ -19,12 +19,11 @@ public class MainApplication {
         int amount;
         String password;
         long walletId;
-
         BankServiceImpl bank = new BankService();
         showMenu();
         boolean state = true;
         while (state) {
-            switch (scanner.nextInt()) {
+            switch (getNumber()) {
                 case 1:
                     customer = bank.saveCustomer(createCustomer());
                     System.out.println("OK");
@@ -32,7 +31,6 @@ public class MainApplication {
                 case 2:
                     customer = bank.login(createCustomer());
                     System.out.println("OK");
-
                     break;
                 case 3:
                     bank.showBankList();
@@ -40,12 +38,11 @@ public class MainApplication {
                     long bankId = scanner.nextInt();
                     bank.saveWallet(createWallet(bankId));
                     System.out.println("OK");
-
                     break;
                 case 4:
                     scanner.nextLine();
                     System.out.print("please enter walletId: ");
-                    walletId = scanner.nextLong();
+                    walletId = getNumberCard();
                     scanner.nextLine();
                     System.out.print("please enter password: ");
                     password = scanner.nextLine();
@@ -58,7 +55,7 @@ public class MainApplication {
                 case 5:
                     scanner.nextLine();
                     System.out.print("please enter walletId: ");
-                    walletId = scanner.nextLong();
+                    walletId = getNumberCard();
                     scanner.nextLine();
                     System.out.print("please enter password: ");
                     password = scanner.nextLine();
@@ -71,9 +68,9 @@ public class MainApplication {
                 case 6:
                     scanner.nextLine();
                     System.out.print("please enter walletId: ");
-                    walletId = scanner.nextLong();
+                    walletId = getNumberCard();
                     System.out.print("please enter other walletId: ");
-                    long otherWalletId = scanner.nextLong();
+                    long otherWalletId = getNumberCard();
                     scanner.nextLine();
                     System.out.print("please enter password: ");
                     password = scanner.nextLine();
@@ -86,7 +83,7 @@ public class MainApplication {
                 case 7:
                     scanner.nextLine();
                     System.out.print("please enter walletId: ");
-                    walletId = scanner.nextLong();
+                    walletId = getNumberCard();
                     scanner.nextLine();
                     System.out.print("please enter password: ");
                     password = scanner.nextLine();
@@ -97,11 +94,14 @@ public class MainApplication {
                 case 8:
                     scanner.nextLine();
                     System.out.print("please enter walletId: ");
-                    walletId = scanner.nextLong();
+                    walletId = getNumberCard();
                     scanner.nextLine();
                     System.out.print("please enter password: ");
                     password = scanner.nextLine();
-                    bank.showListTransaction(walletId, customer.getId(), password);
+                    if(customer!=null)
+                        bank.showListTransaction(walletId, customer.getId(), password);
+                    else
+                        System.out.println("please first login");
                     System.out.println("OK");
 
                     break;
@@ -111,7 +111,7 @@ public class MainApplication {
                 case 10:
                     scanner.nextLine();
                     System.out.print("please enter walletId: ");
-                    walletId = scanner.nextLong();
+                    walletId = getNumberCard();
                     scanner.nextLine();
                     System.out.print("please enter password: ");
                     password = scanner.nextLine();
@@ -123,10 +123,36 @@ public class MainApplication {
                 case 11:
                     state = false;
                     break;
+                default:
+                    System.out.println("Wrong!");
+                    break;
 
             }
         }
 
+    }
+
+    private static long getNumberCard() {
+        while (true){
+            try {
+                long number = scanner.nextLong();
+                return number;
+            }catch (Exception e){
+                scanner.nextLine();
+                System.out.println("please enter number write.");
+            }
+        }
+    }
+
+    private static int getNumber() {
+        while (true) {
+            try {
+               return scanner.nextInt();
+            } catch (Exception e) {
+                return 0;
+            }
+
+        }
     }
 
     private static Wallet createWallet(long bankId) {
@@ -134,16 +160,29 @@ public class MainApplication {
         System.out.print("enter the cvv2: ");
         String cvv2 = scanner.nextLine();
         System.out.print("enter the expire date: ");
-        String expireDate = scanner.nextLine();
+        Date expireDate = getDate();
         System.out.print("enter the password: ");
         String password = scanner.nextLine();
         return Wallet.builder()
                 .setCvv2(cvv2)
-                .setExpirationDate(Date.valueOf(expireDate))
+                .setExpirationDate(expireDate)
                 .setPassword(password)
                 .setCustomer(customer)
                 .setBank(new Bank(bankId))
                 .build();
+    }
+
+    private static Date getDate() {
+        while (true){
+            try {
+                String date;
+                date = scanner.nextLine();
+                Date date1 = Date.valueOf(date);
+                return date1;
+            }catch (Exception e){
+                System.out.println("date not valid. please again input: ");
+            }
+        }
     }
 
     private static Customer createCustomer() {
