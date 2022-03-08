@@ -16,9 +16,9 @@ public class CustomerRepository {
         Session session=MySession.getSession();
         session.beginTransaction();
         try {
-            Long id= (Long) MySession.getSession().save(customer);
+            Long id= (Long) session.save(customer);
             session.getTransaction().commit();
-            return session.get(Customer.class,id);
+            return session.load(Customer.class,id);
         }catch (Exception e){
             session.getTransaction().rollback();
         }
@@ -32,9 +32,9 @@ public class CustomerRepository {
         return customer;
     }
 
-    public Customer login(Customer customer) throws SQLException {
+    public Customer login(Customer customer) {
         Session session=MySession.getSession();
-        List<Customer> resultList = session.createQuery("select c from Customer c where c.password=:password and c.userName=:username")
+        List<Customer> resultList = session.createQuery("select c from Customer c where c.password=:password and c.userName=:username",Customer.class)
                 .setParameter("password", customer.getPassword())
                 .setParameter("username", customer.getUserName())
                 .list();

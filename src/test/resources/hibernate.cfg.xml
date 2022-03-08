@@ -1,0 +1,14 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<!DOCTYPE hibernate-configuration SYSTEM
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.dialect">org.hibernate.dialect.H2Dialect</property>
+        <property name="connection.url">jdbc:h2:mem:testdb;DB_CLOSE_DELAY=0</property>
+        <property name="show_sql">true</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <mapping class="com.maktab.bank.model.Boss"/>
+        <mapping class="com.maktab.bank.model.Customer"/>
+        <mapping class="com.maktab.bank.model.Employee"/>
+    </session-factory>
+</hibernate-configuration>
